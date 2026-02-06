@@ -43,6 +43,15 @@ juce_add_plugin(AntigravReverb
 juce_generate_juce_header(AntigravReverb)
 
 # -----------------------------------------------------------------------------
+# Binary Data
+# -----------------------------------------------------------------------------
+juce_add_binary_data(AntigravReverb_Data
+    SOURCES 
+        AGreverb.jpg
+)
+
+
+# -----------------------------------------------------------------------------
 # Sources
 # -----------------------------------------------------------------------------
 target_sources(AntigravReverb
@@ -74,6 +83,7 @@ target_link_libraries(AntigravReverb
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
+        AntigravReverb_Data
 )
 
 target_compile_definitions(AntigravReverb

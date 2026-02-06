@@ -20,6 +20,7 @@ public:
 private:
     AntigravReverbAudioProcessor& audioProcessor;
     UI::DarkLookAndFeel darkLnF;
+    juce::Image bgImage;
 
     // Primary Sliders (Vertical)
     juce::Slider mixSlider, predelaySlider, decaySlider, loCutSlider, hiCutSlider, depthSlider;

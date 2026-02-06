@@ -5,6 +5,7 @@ AntigravReverbAudioProcessorEditor::AntigravReverbAudioProcessorEditor (Antigrav
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     juce::LookAndFeel::setDefaultLookAndFeel(&darkLnF);
+    bgImage = juce::ImageCache::getFromMemory(BinaryData::AGreverb_jpg, BinaryData::AGreverb_jpgSize);
 
     auto setupSlider = [this](juce::Slider& s, juce::Label& l, std::unique_ptr<SliderAttachment>& att, const juce::String& pID, const juce::String& name, bool vertical)
     {
@@ -82,6 +83,9 @@ void AntigravReverbAudioProcessorEditor::buttonClicked (juce::Button* button)
 void AntigravReverbAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    
+    if (bgImage.isValid())
+        g.drawImage(bgImage, getLocalBounds().toFloat(), juce::RectanglePlacement::stretchToFit);
     
     // Divide Left/Right panels visually
     g.setColour(juce::Colours::black.withAlpha(0.3f));
