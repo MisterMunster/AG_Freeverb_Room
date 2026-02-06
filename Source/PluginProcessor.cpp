@@ -17,7 +17,7 @@ AntigravReverbAudioProcessor::~AntigravReverbAudioProcessor() {}
 
 //==============================================================================
 const juce::String AntigravReverbAudioProcessor::getName() const {
-  return JucePlugin_Name;
+  return "Free-Verb-Room";
 }
 
 bool AntigravReverbAudioProcessor::acceptsMidi() const {

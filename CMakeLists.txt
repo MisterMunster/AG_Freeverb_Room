@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(AntigravReverb VERSION 0.1.0 LANGUAGES C CXX)
+project(FreeVerbRoom VERSION 0.1.0 LANGUAGES C CXX)
 
 # Set standard C++ version
 set(CMAKE_CXX_STANDARD 20)
@@ -24,7 +24,7 @@ FetchContent_MakeAvailable(JUCE)
 # -----------------------------------------------------------------------------
 # Plugin Target
 # -----------------------------------------------------------------------------
-juce_add_plugin(AntigravReverb
+juce_add_plugin(FreeVerbRoom
     COMPANY_NAME "Antigravity"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
@@ -34,13 +34,13 @@ juce_add_plugin(AntigravReverb
     # Formats to build
     FORMATS VST3 Standalone
 
-    PRODUCT_NAME "Antigrav Reverb"
-    PLUGIN_NAME "Antigrav Reverb"
+    PRODUCT_NAME "Free-Verb-Room"
+    PLUGIN_NAME "Free-Verb-Room"
     VERSION "0.1.0"
     description "A true stereo algorithmic reverb."
 )
 
-juce_generate_juce_header(AntigravReverb)
+juce_generate_juce_header(FreeVerbRoom)
 
 # -----------------------------------------------------------------------------
 # Binary Data
@@ -54,9 +54,9 @@ juce_add_binary_data(AntigravReverb_Data
 # -----------------------------------------------------------------------------
 # Sources
 # -----------------------------------------------------------------------------
-target_sources(AntigravReverb
+target_sources(FreeVerbRoom
     PRIVATE
-        Source/PluginProcessor.cpp
+    Source/PluginProcessor.cpp
         Source/PluginProcessor.h
         Source/PluginEditor.cpp
         Source/PluginEditor.h
@@ -73,7 +73,7 @@ target_sources(AntigravReverb
 # -----------------------------------------------------------------------------
 # Link Libraries
 # -----------------------------------------------------------------------------
-target_link_libraries(AntigravReverb
+target_link_libraries(FreeVerbRoom
     PRIVATE
         juce::juce_audio_utils
         juce::juce_audio_processors
@@ -86,7 +86,7 @@ target_link_libraries(AntigravReverb
         AntigravReverb_Data
 )
 
-target_compile_definitions(AntigravReverb
+target_compile_definitions(FreeVerbRoom
     PUBLIC
         JUCE_VST3_CAN_REPLACE_VST2=0
 )

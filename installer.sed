@@ -1,0 +1,30 @@
+[Version]
+Class=IEXPRESS
+SEDVersion=3
+[Options]
+PackagePurpose=InstallApp
+ShowInstallProgramWindow=0
+HideExtractAnimation=0
+UseLongFileName=1
+InsideCompressed=0
+CAB_FixedSize=0
+CAB_ResvCodeSigning=0
+RebootMode=N
+InstallPrompt=
+DisplayLicense=
+FinishMessage=
+TargetName=C:\Users\rvanover\Desktop\FreeVerbRoomInstaller.exe
+FriendlyName=Free-Verb-Room Installer
+AppLaunched=cmd /c setup.bat
+PostInstallCmd=<None>
+AdminQuietInstCmd=
+UserQuietInstCmd=
+SourceFiles=SourceFiles
+[SourceFiles]
+SourceFiles0=C:\Users\rvanover\Documents\GitHub\Antigrav\VST\
+[SourceFiles0]
+%FILE0%=
+%FILE1%=
+[Strings]
+FILE0="data.zip"
+FILE1="setup.bat"
