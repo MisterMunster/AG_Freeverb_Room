@@ -59,6 +59,7 @@ case "$PLATFORM" in
         VST3_DIR="/c/Program Files/Common Files/VST3"
         DESKTOP_DIR="$HOME/Desktop"
         STANDALONE_EXT=".exe"
+        ANTIGRAV_DIR="/c/Users/rvanover/Documents/GitHub/Antigrav"
         ;;
 esac
 
@@ -135,6 +136,24 @@ rm -rf "$DESKTOP_DIR/${PLUGIN_NAME}.vst3"
 cp -r "$VST3_BUNDLE" "$DESKTOP_DIR/"
 ok "VST3 copied to $DESKTOP_DIR/${PLUGIN_NAME}.vst3"
 
+# ─── Step 4: Copy to Antigrav project folder (Windows) ────────────────────────
+if [ -n "${ANTIGRAV_DIR:-}" ]; then
+    if [ -d "$ANTIGRAV_DIR" ] || mkdir -p "$ANTIGRAV_DIR" 2>/dev/null; then
+        info "Copying to Antigrav project: ${BOLD}$ANTIGRAV_DIR${RESET}"
+
+        rm -rf "$ANTIGRAV_DIR/${PLUGIN_NAME}.vst3"
+        cp -r "$VST3_BUNDLE" "$ANTIGRAV_DIR/"
+        ok "VST3 copied to $ANTIGRAV_DIR/${PLUGIN_NAME}.vst3"
+
+        if [ -n "$STANDALONE_BIN" ]; then
+            cp "$STANDALONE_BIN" "$ANTIGRAV_DIR/${PLUGIN_NAME}${STANDALONE_EXT}"
+            ok "Standalone copied to $ANTIGRAV_DIR/${PLUGIN_NAME}${STANDALONE_EXT}"
+        fi
+    else
+        warn "Could not access $ANTIGRAV_DIR — skipping."
+    fi
+fi
+
 # ─── Summary ─────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════╗${RESET}"
@@ -146,6 +165,9 @@ if [ -n "$STANDALONE_BIN" ]; then
 echo -e "  Standalone:   ${GREEN}$DESKTOP_DIR/${PLUGIN_NAME}${STANDALONE_EXT}${RESET}"
 fi
 echo -e "  VST3 (copy):  ${GREEN}$DESKTOP_DIR/${PLUGIN_NAME}.vst3${RESET}"
+if [ -n "${ANTIGRAV_DIR:-}" ] && [ -d "$ANTIGRAV_DIR" ]; then
+echo -e "  Project:      ${GREEN}$ANTIGRAV_DIR/${PLUGIN_NAME}.vst3${RESET}"
+fi
 echo ""
 
 case "$PLATFORM" in
