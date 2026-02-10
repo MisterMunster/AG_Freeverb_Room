@@ -2,7 +2,7 @@
 REM ── AG Freeverb Plate Installer Launcher ──
 REM Runs install.sh via Git Bash from the project directory
 
-set "SCRIPT_DIR=C:\Users\rvanover\Documents\GitHub\AntigravReverb\AG_Freeverb_Plate"
+set "SCRIPT_DIR=C:\Users\rvanover\Documents\GitHub\AntigravReverb"
 
 if not exist "%SCRIPT_DIR%\install.sh" (
     echo ERROR: install.sh not found at %SCRIPT_DIR%
