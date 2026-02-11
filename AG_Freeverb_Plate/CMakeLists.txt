@@ -16,8 +16,8 @@ endif()
 include(FetchContent)
 FetchContent_Declare(
     JUCE
-    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-    GIT_TAG        master
+    URL https://github.com/juce-framework/JUCE/archive/refs/tags/8.0.12.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(JUCE)
 
