@@ -63,6 +63,21 @@ case "$PLATFORM" in
         ;;
 esac
 
+# ─── Step 0: Clean stale CMake caches ────────────────────────────────────────
+# Remove any root-level CMakeCache.txt left by other projects
+if [ -f "$PROJECT_DIR/CMakeCache.txt" ]; then
+    warn "Removing stale CMakeCache.txt from project root..."
+    rm -f "$PROJECT_DIR/CMakeCache.txt"
+fi
+
+# If the build dir cache points to a different project, nuke it
+if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
+    if ! grep -q "AntigravReverb\|AntigravPlateReverb\|AG_Freeverb" "$BUILD_DIR/CMakeCache.txt" 2>/dev/null; then
+        warn "Build directory contains cache from a different project. Cleaning..."
+        rm -rf "$BUILD_DIR"
+    fi
+fi
+
 # ─── Step 1: Build ───────────────────────────────────────────────────────────
 ARTIFACTS_DIR="$BUILD_DIR/AntigravPlateReverb_artefacts"
 
