@@ -83,8 +83,14 @@ ARTIFACTS_DIR="$BUILD_DIR/AntigravPlateReverb_artefacts"
 
 if [ ! -d "$ARTIFACTS_DIR/VST3" ]; then
     info "No build found. Building project..."
-    cmake -B "$BUILD_DIR" "$PROJECT_DIR" 2>&1 | tail -5
-    cmake --build "$BUILD_DIR" --config Release 2>&1 | tail -5
+    info "Running CMake configure..."
+    if ! cmake -B "$BUILD_DIR" "$PROJECT_DIR" 2>&1; then
+        fail "CMake configure failed. Check the output above for details."
+    fi
+    info "Building (this may take a few minutes)..."
+    if ! cmake --build "$BUILD_DIR" --config Release 2>&1; then
+        fail "Build failed. Check the output above for details."
+    fi
     echo ""
 fi
 
