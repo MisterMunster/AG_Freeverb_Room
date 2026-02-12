@@ -12,6 +12,8 @@ Build a standalone exe:
 
 import os
 import sys
+import random
+import time
 
 # ── Platform-specific input handling ────────────────────────────────────────
 
@@ -195,7 +197,8 @@ def show_start_screen():
         return True
 
 
-def draw_game(board, cursor, current_player, game_over, winner, winning_cells, scores):
+def draw_game(board, cursor, current_player, game_over, winner, winning_cells,
+              scores, vs_cpu=False, difficulty="", cpu_thinking=False):
     clear_screen()
     rows, cols = get_terminal_size()
 
@@ -207,17 +210,29 @@ def draw_game(board, cursor, current_player, game_over, winner, winning_cells, s
     sy = (rows - WIN_H) // 2
     sx = (cols - WIN_W) // 2
 
-    draw_border(sy, sx, WIN_W, WIN_H, " TIC-TAC-TOE ")
+    title = " TIC-TAC-TOE "
+    if vs_cpu:
+        title = " TIC-TAC-TOE  vs CPU ({}) ".format(difficulty)
+    draw_border(sy, sx, WIN_W, WIN_H, title)
 
     # Scoreboard
-    score_line = "X: {}   O: {}   Draw: {}".format(scores["X"], scores["O"], scores["Draw"])
+    if vs_cpu:
+        score_line = "You (X): {}   CPU (O): {}   Draw: {}".format(
+            scores["X"], scores["O"], scores["Draw"])
+    else:
+        score_line = "X: {}   O: {}   Draw: {}".format(scores["X"], scores["O"], scores["Draw"])
     put_center(sy + 2, sx, WIN_W, score_line, BOLD)
 
     # Current player
     if not game_over:
-        turn_str = "Player {}'s turn".format(current_player)
-        color = CYAN if current_player == "X" else MAGENTA
-        put_center(sy + 3, sx, WIN_W, turn_str, color, BOLD)
+        if cpu_thinking:
+            put_center(sy + 3, sx, WIN_W, "CPU is thinking...", MAGENTA, BOLD)
+        elif vs_cpu and current_player == "X":
+            put_center(sy + 3, sx, WIN_W, "Your turn (X)", CYAN, BOLD)
+        else:
+            turn_str = "Player {}'s turn".format(current_player)
+            color = CYAN if current_player == "X" else MAGENTA
+            put_center(sy + 3, sx, WIN_W, turn_str, color, BOLD)
 
     # Board
     cell_w = 11
@@ -289,6 +304,10 @@ def draw_game(board, cursor, current_player, game_over, winner, winning_cells, s
     if game_over:
         if winner == "Draw":
             put_center(msg_y, sx, WIN_W, "It's a Draw!", RED, BOLD)
+        elif vs_cpu and winner == "O":
+            put_center(msg_y, sx, WIN_W, "CPU Wins!", RED, BOLD)
+        elif vs_cpu and winner == "X":
+            put_center(msg_y, sx, WIN_W, "You Win!", GREEN, BOLD)
         else:
             put_center(msg_y, sx, WIN_W, "Player {} Wins!".format(winner), GREEN, BOLD)
         put_center(msg_y + 1, sx, WIN_W, "[R] Restart  |  [Q] Quit", DIM)
@@ -314,6 +333,186 @@ def check_winner(board):
     return None, []
 
 
+# ── CPU opponent ────────────────────────────────────────────────────────────
+
+def minimax(board, is_maximizing):
+    """Minimax algorithm. CPU is 'O' (maximizing), player is 'X' (minimizing)."""
+    result, _ = check_winner(board)
+    if result == "O":
+        return 10
+    if result == "X":
+        return -10
+    if result == "Draw":
+        return 0
+
+    if is_maximizing:
+        best = -100
+        for i in range(9):
+            if board[i] == " ":
+                board[i] = "O"
+                best = max(best, minimax(board, False))
+                board[i] = " "
+        return best
+    else:
+        best = 100
+        for i in range(9):
+            if board[i] == " ":
+                board[i] = "X"
+                best = min(best, minimax(board, True))
+                board[i] = " "
+        return best
+
+
+def cpu_move_hard(board):
+    """Unbeatable CPU using full minimax."""
+    best_score = -100
+    best_moves = []
+    for i in range(9):
+        if board[i] == " ":
+            board[i] = "O"
+            score = minimax(board, False)
+            board[i] = " "
+            if score > best_score:
+                best_score = score
+                best_moves = [i]
+            elif score == best_score:
+                best_moves.append(i)
+    return random.choice(best_moves)
+
+
+def cpu_move_medium(board):
+    """Medium CPU: wins if it can, blocks if it must, otherwise random."""
+    # Win if possible
+    for i in range(9):
+        if board[i] == " ":
+            board[i] = "O"
+            result, _ = check_winner(board)
+            board[i] = " "
+            if result == "O":
+                return i
+    # Block opponent win
+    for i in range(9):
+        if board[i] == " ":
+            board[i] = "X"
+            result, _ = check_winner(board)
+            board[i] = " "
+            if result == "X":
+                return i
+    # Take center if open
+    if board[4] == " ":
+        return 4
+    # Random open spot
+    open_spots = [i for i in range(9) if board[i] == " "]
+    return random.choice(open_spots)
+
+
+def cpu_move_easy(board):
+    """Easy CPU: purely random moves."""
+    open_spots = [i for i in range(9) if board[i] == " "]
+    return random.choice(open_spots)
+
+
+def cpu_get_move(board, difficulty):
+    """Dispatch to the right difficulty."""
+    if difficulty == "Hard":
+        return cpu_move_hard(board)
+    elif difficulty == "Medium":
+        return cpu_move_medium(board)
+    else:
+        return cpu_move_easy(board)
+
+
+# ── Mode / difficulty selection screens ─────────────────────────────────────
+
+def show_mode_screen():
+    """Let the player pick 1P vs CPU or 2P. Returns 'cpu' / 'pvp' / None."""
+    selected = 0
+    options = ["1 Player  (vs CPU)", "2 Players (local)"]
+    while True:
+        clear_screen()
+        rows, cols = get_terminal_size()
+        if rows < WIN_H + 2 or cols < WIN_W + 2:
+            put(0, 0, "Terminal too small!")
+            flush()
+            get_key()
+            continue
+
+        sy = (rows - WIN_H) // 2
+        sx = (cols - WIN_W) // 2
+        draw_border(sy, sx, WIN_W, WIN_H, " TIC-TAC-TOE ")
+
+        put_center(sy + 4, sx, WIN_W, "SELECT MODE", GREEN, BOLD)
+
+        for i, label in enumerate(options):
+            y = sy + 7 + i * 2
+            if i == selected:
+                put_center(y, sx, WIN_W, "> " + label + " <", CYAN, BOLD, REVERSE)
+            else:
+                put_center(y, sx, WIN_W, "  " + label + "  ", WHITE)
+
+        put_center(sy + WIN_H - 3, sx, WIN_W, "Up/Down: select  |  Enter: confirm", DIM)
+        put_center(sy + WIN_H - 2, sx, WIN_W, "Q / Esc: quit", DIM)
+        flush()
+
+        key = get_key()
+        if key in ("q", "Q", "ESC"):
+            return None
+        if key in ("UP", "w", "W"):
+            selected = (selected - 1) % len(options)
+        elif key in ("DOWN", "s", "S"):
+            selected = (selected + 1) % len(options)
+        elif key in ("ENTER", " "):
+            return "cpu" if selected == 0 else "pvp"
+
+
+def show_difficulty_screen():
+    """Let the player pick CPU difficulty. Returns difficulty string or None."""
+    selected = 1  # default to Medium
+    options = ["Easy", "Medium", "Hard"]
+    descriptions = [
+        "CPU picks random moves",
+        "CPU blocks and attacks, but can be tricked",
+        "Unbeatable minimax AI",
+    ]
+    while True:
+        clear_screen()
+        rows, cols = get_terminal_size()
+        if rows < WIN_H + 2 or cols < WIN_W + 2:
+            put(0, 0, "Terminal too small!")
+            flush()
+            get_key()
+            continue
+
+        sy = (rows - WIN_H) // 2
+        sx = (cols - WIN_W) // 2
+        draw_border(sy, sx, WIN_W, WIN_H, " TIC-TAC-TOE ")
+
+        put_center(sy + 4, sx, WIN_W, "SELECT DIFFICULTY", GREEN, BOLD)
+
+        for i, label in enumerate(options):
+            y = sy + 7 + i * 3
+            if i == selected:
+                put_center(y, sx, WIN_W, "> " + label + " <", CYAN, BOLD, REVERSE)
+                put_center(y + 1, sx, WIN_W, descriptions[i], YELLOW)
+            else:
+                put_center(y, sx, WIN_W, "  " + label + "  ", WHITE)
+                put_center(y + 1, sx, WIN_W, descriptions[i], DIM)
+
+        put_center(sy + WIN_H - 3, sx, WIN_W, "Up/Down: select  |  Enter: confirm", DIM)
+        put_center(sy + WIN_H - 2, sx, WIN_W, "Q / Esc: back", DIM)
+        flush()
+
+        key = get_key()
+        if key in ("q", "Q", "ESC"):
+            return None
+        if key in ("UP", "w", "W"):
+            selected = (selected - 1) % len(options)
+        elif key in ("DOWN", "s", "S"):
+            selected = (selected + 1) % len(options)
+        elif key in ("ENTER", " "):
+            return options[selected]
+
+
 def main():
     if os.name == "nt":
         _enable_ansi()
@@ -322,6 +521,18 @@ def main():
     try:
         if not show_start_screen():
             return
+
+        # Mode selection
+        mode = show_mode_screen()
+        if mode is None:
+            return
+
+        vs_cpu = (mode == "cpu")
+        difficulty = ""
+        if vs_cpu:
+            difficulty = show_difficulty_screen()
+            if difficulty is None:
+                return
 
         board = [" "] * 9
         cursor = 4
@@ -332,7 +543,26 @@ def main():
         scores = {"X": 0, "O": 0, "Draw": 0}
 
         while True:
-            draw_game(board, cursor, current_player, game_over, winner, winning_cells, scores)
+            # CPU turn
+            if vs_cpu and current_player == "O" and not game_over:
+                draw_game(board, cursor, current_player, game_over, winner,
+                          winning_cells, scores, vs_cpu, difficulty, cpu_thinking=True)
+                time.sleep(0.5)
+                move = cpu_get_move(board, difficulty)
+                board[move] = "O"
+                cursor = move
+                result, cells = check_winner(board)
+                if result:
+                    game_over = True
+                    winner = result
+                    winning_cells = cells
+                    scores[result] = scores.get(result, 0) + 1
+                else:
+                    current_player = "X"
+                continue
+
+            draw_game(board, cursor, current_player, game_over, winner,
+                      winning_cells, scores, vs_cpu, difficulty)
             key = get_key()
 
             if game_over:
