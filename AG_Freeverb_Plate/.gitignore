@@ -3,4 +3,3 @@ build/
 *.zip
 *.exe
 *.vst3
-CMakeCache.txt

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(AntigravReverb VERSION 0.1.0 LANGUAGES C CXX)
+project(AntigravPlateReverb VERSION 0.1.0 LANGUAGES C CXX)
 
 # Set standard C++ version
 set(CMAKE_CXX_STANDARD 20)
@@ -24,28 +24,28 @@ FetchContent_MakeAvailable(JUCE)
 # -----------------------------------------------------------------------------
 # Plugin Target
 # -----------------------------------------------------------------------------
-juce_add_plugin(AntigravReverb
+juce_add_plugin(AntigravPlateReverb
     COMPANY_NAME "Antigravity"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
-    
+
     # Formats to build
     FORMATS VST3 Standalone
 
-    PRODUCT_NAME "Antigrav Reverb"
-    PLUGIN_NAME "Antigrav Reverb"
+    PRODUCT_NAME "Antigrav Plate Reverb"
+    PLUGIN_NAME "Antigrav Plate Reverb"
     VERSION "0.1.0"
-    description "A true stereo algorithmic reverb."
+    description "A lush stereo algorithmic plate reverb."
 )
 
-juce_generate_juce_header(AntigravReverb)
+juce_generate_juce_header(AntigravPlateReverb)
 
 # -----------------------------------------------------------------------------
 # Sources
 # -----------------------------------------------------------------------------
-target_sources(AntigravReverb
+target_sources(AntigravPlateReverb
     PRIVATE
         Source/PluginProcessor.cpp
         Source/PluginProcessor.h
@@ -56,7 +56,6 @@ target_sources(AntigravReverb
         Source/DSP/LFO.h
         Source/DSP/EarlyReflections.h
         Source/DSP/LateReverb.h
-        Source/DSP/LateReverb.h
         Source/DSP/Filters.h
         Source/UI/LookAndFeel.h
 )
@@ -64,7 +63,7 @@ target_sources(AntigravReverb
 # -----------------------------------------------------------------------------
 # Link Libraries
 # -----------------------------------------------------------------------------
-target_link_libraries(AntigravReverb
+target_link_libraries(AntigravPlateReverb
     PRIVATE
         juce::juce_audio_utils
         juce::juce_audio_processors
@@ -76,34 +75,32 @@ target_link_libraries(AntigravReverb
         juce::juce_recommended_warning_flags
 )
 
-target_compile_definitions(AntigravReverb
+target_compile_definitions(AntigravPlateReverb
     PUBLIC
         JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
 )
 
 # -----------------------------------------------------------------------------
 # Unit Tests
 # -----------------------------------------------------------------------------
-juce_add_console_app(AntigravReverb_Tests
-    PRODUCT_NAME "Antigrav Reverb Tests"
+juce_add_console_app(AntigravPlateReverb_Tests
+    PRODUCT_NAME "Antigrav Plate Reverb Tests"
     VERSION "0.1.0"
 )
 
-juce_generate_juce_header(AntigravReverb_Tests)
+juce_generate_juce_header(AntigravPlateReverb_Tests)
 
-target_sources(AntigravReverb_Tests
+target_sources(AntigravPlateReverb_Tests
     PRIVATE
         Tests/TestRunner.cpp
         Tests/DelayLineTests.cpp
         Tests/DSPTests.cpp
         Tests/EngineTests.cpp
-        # Filter/DSP sources will be added here as we create them
-        # For now, we might need to expose DSP code as a separate static lib 
-        # to share between Plugin and Tests to avoid including .cpp files directly.
-        # But for simplicity, we can just include the source files here for now.
 )
 
-target_link_libraries(AntigravReverb_Tests
+target_link_libraries(AntigravPlateReverb_Tests
     PRIVATE
         juce::juce_core
         juce::juce_events
@@ -116,4 +113,10 @@ target_link_libraries(AntigravReverb_Tests
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
+)
+
+target_compile_definitions(AntigravPlateReverb_Tests
+    PUBLIC
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
 )
